@@ -1,0 +1,35 @@
+# Local Python environments and caches
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Credentials and local settings
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+*.pem
+*.key
+
+# Local videos, generated references, models and logs
+uploads/
+input_videos/
+processed_videos/
+reference_library/
+models/
+runs/
+*.pt
+*.onnx
+*.task
+*.log
+*.tmp
+
+# Editor and OS files
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

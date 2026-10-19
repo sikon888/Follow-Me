@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow Me</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+</head>
+
+<body>
+
+<header class="top-bar">
+    <a class="back-button" href="{{ url_for('page.home') }}">
+        ← Back to Playlist
+    </a>
+
+    <h1 class="page-title follow-brand">
+        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Follow <span>Me</span></span></span>
+        <span class="brand-tagline">Find your rhythm</span>
+    </h1>
+</header>
+
+<main class="game-page">
+
+    <section class="game-card">
+
+        <div class="game-top">
+            <div class="reference-title">
+                <span class="reference-label" title="{{ reference_name }}">{{ reference_name }}</span>
+                <span id="gameStatus" class="game-status" hidden>Waiting</span>
+            </div>
+
+            <div class="scoreboard">
+                <div class="score-item">
+                    <span class="score-label">SCORE</span>
+                    <strong id="scoreValue">0</strong>
+                </div>
+
+                <div class="score-item">
+                    <span class="score-label">ACC</span>
+                    <strong id="accuracyValue">0%</strong>
+                </div>
+
+                <div class="score-item">
+                    <span class="score-label">COMBO</span>
+                    <strong id="comboValue">x0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+
+            <span id="currentTime" class="time-label">0:00</span>
+
+            <div class="progress-track-wrapper">
+                <input
+                    id="videoProgress"
+                    class="video-progress"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="0"
+                    step="0.1"
+                    aria-label="Video progress"
+                >
+            </div>
+
+            <span id="duration" class="time-label">0:00</span>
+
+            <div class="volume-control">
+                <button
+                    id="muteButton"
+                    class="volume-button"
+                    type="button"
+                    title="Mute"
+                    aria-label="Mute"
+                >
+                    🔊
+                </button>
+
+                <input
+                    id="volumeSlider"
+                    class="volume-slider"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value="1"
+                    step="0.01"
+                    aria-label="Volume"
+                >
+            </div>
+
+        </div>
+
+        <div class="camera-comparison">
+        <section class="reference-panel" aria-label="Reference video">
+        <div class="player-heading">Reference video</div>
+        <div class="video-area">
+
+            <video
+                id="referenceVideo"
+                class="reference-video"
+                preload="metadata"
+            >
+                <source
+                    src="{{ url_for('video.uploaded_file', filename=filename) }}"
+                    type="video/mp4"
+                >
+                Browser ไม่รองรับ Video
+            </video>
+
+            <div id="countdown" class="countdown hidden">3</div>
+
+            <div id="startOverlay" class="start-overlay">
+                <div class="ready-text">Ready to Dance?</div>
+            </div>
+
+        </div>
+        <p class="reference-caption">Follow the dancer as a mirror</p>
+        </section>
+
+        <section class="player-panel" aria-label="Raspberry Pi player camera">
+            <div class="player-heading">Player <span id="piConnection" role="status">Disconnected</span></div>
+            <div class="player-view">
+                <canvas id="piPreview" width="640" height="480" hidden></canvas>
+                <div id="piDisconnected">Disconnected</div>
+            </div>
+            <p id="playerPoseStatus" role="status">Waiting for Raspberry Pi camera</p>
+        </section>
+        </div>
+
+        <div class="game-controls">
+
+            <button
+                id="readyButton"
+                class="ready-button"
+                type="button"
+            >
+                Ready!
+            </button>
+
+            <button
+                id="restartButton"
+                class="circle-button restart-button"
+                type="button"
+                title="Restart"
+                aria-label="Restart"
+            >
+                ↻
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/player.js') }}" data-endpoint="{{ url_for('player.player_frame', filename=filename) }}"></script>
+</body>
+</html>

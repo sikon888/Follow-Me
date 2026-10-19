@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Upload Video</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/base.css') }}"
+    >
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/upload.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="top-bar">
+
+    <a
+        class="back-button"
+        href="{{ url_for('page.home') }}"
+    >
+        ← Back to Playlist
+    </a>
+
+</header>
+
+
+<main class="container">
+
+
+    <h1>
+        Upload Video
+    </h1>
+
+
+    <p class="description">
+        Add a new dance video to your playlist.
+    </p>
+
+
+    <form
+        action="{{ url_for('video.upload_file') }}"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+
+        <div class="file-box">
+
+
+            <input
+                id="videoInput"
+                type="file"
+                name="song"
+                accept=".mp4,video/mp4"
+                required
+            >
+
+
+            <p id="filename">
+                ยังไม่ได้เลือกไฟล์
+            </p>
+
+
+        </div>
+
+
+        <button
+            class="upload-submit"
+            type="submit"
+        >
+            Upload Video
+        </button>
+
+
+    </form>
+
+
+</main>
+
+
+<script
+    src="{{ url_for('static', filename='js/upload.js') }}"
+></script>
+
+
+</body>
+
+</html>

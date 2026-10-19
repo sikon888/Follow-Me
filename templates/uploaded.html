@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ filename }}</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/base.css') }}"
+    >
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/uploaded.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="top-bar">
+
+    <a
+        class="back-button"
+        href="{{ url_for('page.home') }}"
+    >
+        ← Back to Playlist
+    </a>
+
+</header>
+
+
+<main class="container">
+
+
+    <h1 class="filename">
+        {{ reference_name }}
+    </h1>
+
+    <form id="renameReferenceForm" class="rename-reference">
+        <label for="referenceName">Reference name</label>
+        <div class="rename-fields">
+            <input id="referenceName" name="name" value="{{ reference_name }}" maxlength="120" required>
+            <button id="renameReferenceButton" class="save-button" type="submit">Save Name</button>
+        </div>
+        <p id="renameReferenceStatus" role="status" aria-live="polite"></p>
+    </form>
+
+
+    <div class="video-stage">
+    <video
+        class="video-player"
+        controls
+        preload="metadata"
+    >
+
+        <source
+            src="{{
+                url_for(
+                    'video.uploaded_file',
+                    filename=filename
+                )
+            }}"
+            type="video/mp4"
+        >
+
+        Browser ไม่รองรับ Video
+
+    </video>
+    <canvas id="referenceSkeleton" hidden aria-label="Reference skeleton overlay"></canvas>
+    </div>
+    <p id="skeletonHint" hidden aria-live="polite"></p>
+
+
+    <div class="controls">
+
+
+        <button
+            id="saveButton"
+            class="save-button"
+            type="button"
+        >
+            Save Reference
+        </button>
+        <button id="skeletonButton" class="save-button" type="button"
+                aria-pressed="false" disabled>Show Skeleton</button>
+
+
+    </div>
+
+
+    <div class="status-box">
+
+
+        <div>
+
+            Status:
+
+            <strong id="status">
+                {{ current_status }}
+            </strong>
+
+        </div>
+
+
+        <p id="reference"></p>
+
+        <p id="error"></p>
+
+
+    </div>
+
+
+</main>
+
+
+<!-- ส่ง filename จาก Flask -> JavaScript -->
+
+<div
+    id="videoData"
+    data-filename="{{ filename }}"
+    hidden
+></div>
+
+
+<script
+    src="{{ url_for('static', filename='js/uploaded.js') }}"
+></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+:root {
+    --bg-1: #060914;
+    --bg-2: #0a1024;
+    --bg-3: #17102f;
+
+    --surface: rgba(20, 24, 50, 0.92);
+    --surface-light: rgba(255, 255, 255, 0.07);
+
+    --border: rgba(255, 255, 255, 0.08);
+
+    --text: #f5f7ff;
+    --muted: #8e98b8;
+
+    --purple: #7c3aed;
+    --pink: #ec4899;
+    --green: #22c55e;
+    --red: #ff8394;
+
+    --radius: 12px;
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: var(--text);
+
+    background:
+        radial-gradient(
+            circle at 80% 10%,
+            rgba(124, 58, 237, 0.2),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 10% 70%,
+            rgba(37, 99, 235, 0.14),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            var(--bg-1),
+            var(--bg-2),
+            var(--bg-3)
+        );
+
+    background-attachment: fixed;
+}
+
+
+a,
+button {
+    font-family: inherit;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+/* Shared rhythm-game wordmark. */
+.follow-brand {
+    white-space: nowrap;
+    line-height: 1;
+}
+.brand-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.brand-wordmark {
+    font-size: clamp(25px, 2.7vw, 36px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -1.6px;
+    color: #f5f3ff;
+    text-shadow: 0 2px 18px rgba(168, 85, 247, .35);
+}
+.brand-wordmark > span {
+    color: #f472b6;
+    background: linear-gradient(110deg, #c4b5fd 5%, #f472b6 55%, #67e8f9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-right: 5px;
+}
+.brand-tagline {
+    display: block;
+    margin: 5px 0 0 31px;
+    font-size: 8px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #b5accf;
+    text-shadow: none;
+}
+.brand-equalizer {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 27px;
+    filter: drop-shadow(0 0 7px rgba(167, 139, 250, .5));
+}
+.brand-equalizer i {
+    display: block;
+    width: 4px;
+    height: 15px;
+    border-radius: 5px;
+    background: linear-gradient(#67e8f9, #c084fc, #f472b6);
+    animation: brand-beat 1.1s ease-in-out infinite alternate;
+}
+.brand-equalizer i:nth-child(2) { height: 27px; animation-delay: -.5s; }
+.brand-equalizer i:nth-child(3) { height: 20px; animation-delay: -.8s; }
+.brand-equalizer i:nth-child(4) { height: 11px; animation-delay: -.25s; }
+@keyframes brand-beat {
+    from { transform: scaleY(.45); }
+    to { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .brand-equalizer i { animation: none; }
+}

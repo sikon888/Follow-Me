@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Follow Me</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/base.css') }}"
+    >
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/index.css') }}"
+    >
+</head>
+
+<body>
+
+<header class="top-bar">
+
+    <form id="youtubeSearchForm" class="youtube-search" role="search" aria-label="Search YouTube">
+        <input id="youtubeQuery" type="search" placeholder="Search YouTube videos" aria-label="Search YouTube videos" maxlength="200" required>
+        <button id="youtubeSearchButton" type="submit">Search</button>
+    </form>
+
+    <a
+        href="{{ url_for('page.upload_page') }}"
+        class="upload-button"
+    >
+        + Upload
+    </a>
+
+    <h1 class="title follow-brand">
+        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Follow <span>Me</span></span></span>
+        <span class="brand-tagline">Find your rhythm</span>
+    </h1>
+
+    <div
+        id="cameraStatus"
+        class="camera-status disconnected"
+    >
+
+        <span class="status-dot"></span>
+
+        <div class="camera-status-text">
+
+            <span class="camera-label">
+                Camera
+            </span>
+
+            <strong id="cameraStatusText">
+                Disconnected
+            </strong>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="content">
+
+    <section id="youtubeSearchSection" class="youtube-search-section" hidden aria-label="YouTube search results">
+        <div class="youtube-results-heading"><h2>YouTube videos</h2><button id="closeYoutubeSearch" type="button" aria-label="Close YouTube results">Close</button></div>
+        <p id="youtubeSearchStatus" role="status" aria-live="polite"></p>
+        <a id="youtubeSearchLink" target="_blank" rel="noopener noreferrer" hidden>Search on YouTube ↗</a>
+        <div id="youtubeResults" class="youtube-results"></div>
+    </section>
+
+    <div class="playlist-header">
+
+        <div>
+            <h2>Playlist</h2>
+
+            <p class="playlist-description">
+                Choose a ready song and start dancing.
+            </p>
+        </div>
+
+        <span class="video-count">
+
+            {{ playlist|length }}
+
+            {% if playlist|length == 1 %}
+                Video
+            {% else %}
+                Videos
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    {% if playlist %}
+
+        <div class="playlist">
+
+            {% for video in playlist %}
+
+                <article class="video-card">
+
+                    <div class="video-preview-container">
+
+                        <video
+                            class="video-preview"
+                            preload="metadata"
+                            controls
+                        >
+
+                            <source
+                                src="{{
+                                    url_for(
+                                        'video.uploaded_file',
+                                        filename=video['filename']
+                                    )
+                                }}"
+                                type="video/mp4"
+                            >
+
+                            Browser ไม่รองรับ Video
+
+                        </video>
+
+                    </div>
+
+
+                    <div class="video-info">
+
+                        <div class="video-name">
+                            {{ video["display_name"] }}
+                        </div>
+
+
+                        <div class="status-row">
+
+                            {% if video["ready"] %}
+
+                                <span class="ready">
+                                    ✓ Ready
+                                </span>
+
+                            {% else %}
+
+                                <span class="not-ready">
+                                    Not Ready
+                                </span>
+
+                            {% endif %}
+
+
+                            <div class="card-buttons">
+
+                                {% if video["ready"] %}
+
+                                    <a
+                                        class="play-button"
+                                        href="{{
+                                            url_for(
+                                                'game.play_game',
+                                                filename=video['filename']
+                                            )
+                                        }}"
+                                    >
+                                        Play
+                                    </a>
+
+                                {% endif %}
+
+
+                                <a
+                                    class="open-button"
+                                    href="{{
+                                        url_for(
+                                            'video.open_video',
+                                            filename=video['filename']
+                                        )
+                                    }}"
+                                >
+                                    Open
+                                </a>
+
+
+                                <button
+                                    class="delete-button"
+                                    type="button"
+                                    data-filename="{{ video['filename'] }}"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <div class="empty">
+
+            <div class="empty-icon">
+                ♪
+            </div>
+
+            <h3>
+                Playlist Empty
+            </h3>
+
+            <p>
+                Upload your first dance video to get started.
+            </p>
+
+            <a
+                href="{{ url_for('page.upload_page') }}"
+                class="upload-button empty-upload-button"
+            >
+                + Upload Video
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</main>
+
+
+<script
+    src="{{ url_for('static', filename='js/index.js') }}"
+></script>
+
+</body>
+
+</html>
