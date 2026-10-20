@@ -20,11 +20,12 @@ uploads/
 input_videos/
 processed_videos/
 reference_library/
-models/
+models/*
 runs/
 *.pt
 *.onnx
 *.task
+!models/pose_landmarker_full.task
 *.log
 *.tmp
 
