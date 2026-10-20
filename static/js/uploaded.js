@@ -2,6 +2,14 @@
 // VIDEO DATA
 // =========================================
 
+const adviceToggle = document.getElementById('toggleBuildAdvice');
+const adviceContent = document.getElementById('buildAdviceContent');
+adviceToggle.addEventListener('click', () => {
+    adviceContent.hidden = !adviceContent.hidden;
+    adviceToggle.setAttribute('aria-expanded', String(!adviceContent.hidden));
+    adviceToggle.textContent = adviceContent.hidden ? 'Show recommendations' : 'Hide recommendations';
+});
+
 const videoFilename =
     document
         .getElementById(
@@ -163,7 +171,9 @@ async function checkStatus() {
 
 
         statusText.textContent =
-            data.status;
+            data.status === 'Processing'
+                ? `Processing${Number.isFinite(data.progress) ? ` ${data.progress}%` : '…'}`
+                : data.status;
 
 
         // ---------------------------------
@@ -174,6 +184,9 @@ async function checkStatus() {
             data.status ===
             "Processing"
         ) {
+            saveButton.disabled = true;
+            saveButton.textContent = Number.isFinite(data.progress)
+                ? `Building Reference ${data.progress}%` : 'Building Reference…';
 
             setTimeout(
                 checkStatus,
@@ -346,7 +359,8 @@ function updateSkeletonAvailability() {
 new MutationObserver(updateSkeletonAvailability).observe(statusText, {childList: true, subtree: true});
 updateSkeletonAvailability();
 
-function drawReferenceSkeleton() {
+function drawReferenceSkeleton(mediaTime = previewVideo.currentTime) {
+    if (typeof mediaTime !== 'number') mediaTime = previewVideo.currentTime;
     if (!skeletonVisible || !skeletonData || !previewVideo.videoWidth) return;
     const width = previewVideo.videoWidth;
     const height = previewVideo.videoHeight;
@@ -365,7 +379,7 @@ function drawReferenceSkeleton() {
     let low = 0, high = times.length;
     while (low < high) {
         const mid = (low + high) >>> 1;
-        if (times[mid] <= previewVideo.currentTime) low = mid + 1;
+        if (times[mid] <= mediaTime + 0.000001) low = mid + 1;
         else high = mid;
     }
     if (!low) return;
@@ -428,8 +442,8 @@ for (const event of ['loadedmetadata', 'seeked', 'timeupdate', 'pause']) {
     previewVideo.addEventListener(event, drawReferenceSkeleton);
 }
 new ResizeObserver(drawReferenceSkeleton).observe(previewVideo);
-function previewFrame() {
-    drawReferenceSkeleton();
+function previewFrame(now, metadata) {
+    drawReferenceSkeleton(metadata?.mediaTime ?? previewVideo.currentTime);
     if (previewVideo.requestVideoFrameCallback) previewVideo.requestVideoFrameCallback(previewFrame);
     else requestAnimationFrame(previewFrame);
 }

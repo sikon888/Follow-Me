@@ -622,7 +622,7 @@ async function startGame() {
 
 
         gameStatus.textContent =
-            "Cannot play video";
+            "Press Ready to allow video playback";
 
 
         gameRunning =

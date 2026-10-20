@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Follow Me</title>
+    <title>Let's move!</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
@@ -17,8 +17,7 @@
     </a>
 
     <h1 class="page-title follow-brand">
-        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Follow <span>Me</span></span></span>
-        <span class="brand-tagline">Find your rhythm</span>
+        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Let's <span>move!</span></span></span>
     </h1>
 </header>
 
@@ -39,7 +38,7 @@
                 </div>
 
                 <div class="score-item">
-                    <span class="score-label">ACC</span>
+                    <span class="score-label" title="Accuracy of your latest scored pose">LIVE ACC</span>
                     <strong id="accuracyValue">0%</strong>
                 </div>
 
@@ -114,7 +113,7 @@
             <div id="countdown" class="countdown hidden">3</div>
 
             <div id="startOverlay" class="start-overlay">
-                <div class="ready-text">Ready to Dance?</div>
+                <div class="ready-text">Raise a hand above your head<br>Hold for 1 second to start</div>
             </div>
 
         </div>
@@ -128,6 +127,7 @@
                 <div id="piDisconnected">Disconnected</div>
             </div>
             <p id="playerPoseStatus" role="status">Waiting for Raspberry Pi camera</p>
+            <p id="cameraTimingStatus" class="reference-caption"></p>
         </section>
         </div>
 
@@ -160,5 +160,6 @@
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/player.js') }}" data-endpoint="{{ url_for('player.player_frame', filename=filename) }}"></script>
+<script src="{{ url_for('static', filename='js/effects.js') }}"></script>
 </body>
 </html>

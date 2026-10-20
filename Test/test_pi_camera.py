@@ -9,6 +9,9 @@ from routes import pi_routes
 
 class PiCameraTests(unittest.TestCase):
     def setUp(self):
+        self.detector_state = patch('routes.player_routes.live_detector', None)
+        self.detector_state.start()
+        self.addCleanup(self.detector_state.stop)
         self.client = app.test_client()
         pi_routes._frame = None
         pi_routes._sequence = 0

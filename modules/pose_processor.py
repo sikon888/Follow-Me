@@ -24,7 +24,9 @@ def landmarks_to_coco(landmarks, width, height):
 
 
 class PoseDetector:
-    def __init__(self):
+    def __init__(self, image_mode=False, max_dimension=640):
+        self.image_mode = image_mode
+        self.max_dimension = max_dimension
         if not MODEL_PATH.is_file():
             raise RuntimeError(f"MediaPipe model missing: {MODEL_PATH}. See README.md")
         try:
@@ -35,35 +37,44 @@ class PoseDetector:
         self.task = mp.tasks.vision.PoseLandmarker.create_from_options(
             mp.tasks.vision.PoseLandmarkerOptions(
                 base_options=mp.tasks.BaseOptions(model_asset_path=str(MODEL_PATH)),
-                running_mode=mp.tasks.vision.RunningMode.VIDEO, num_poses=1,
+                running_mode=(mp.tasks.vision.RunningMode.IMAGE if image_mode else mp.tasks.vision.RunningMode.VIDEO), num_poses=1,
                 min_pose_detection_confidence=0.5, min_pose_presence_confidence=0.5,
                 min_tracking_confidence=0.5))
         self.last_timestamp = -1
 
     def detect(self, frame, timestamp_ms):
+        height, width = frame.shape[:2]
+        if self.max_dimension and max(height, width) > self.max_dimension:
+            ratio = self.max_dimension / max(height, width)
+            frame = cv2.resize(frame, (round(width * ratio), round(height * ratio)))
         timestamp_ms = max(self.last_timestamp + 1, int(round(timestamp_ms)))
         self.last_timestamp = timestamp_ms
         image = self.mp.Image(image_format=self.mp.ImageFormat.SRGB,
                               data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        result = self.task.detect_for_video(image, timestamp_ms)
+        result = self.task.detect(image) if self.image_mode else self.task.detect_for_video(image, timestamp_ms)
         return landmarks_to_coco(result.pose_landmarks[0] if result.pose_landmarks else None,
-                                 frame.shape[1], frame.shape[0])
+                                 width, height)
 
     def close(self):
         self.task.close()
 
 
-def extract_skeleton(video_path, return_timestamps=False):
+def extract_skeleton(video_path, return_timestamps=False, target_fps=None, progress_callback=None):
     capture = cv2.VideoCapture(str(video_path))
     detector = None
     frames, times = [], []
+    decoded = 0
+    previous_timestamp = None
     try:
         if not capture.isOpened():
             raise ValueError("Cannot open video")
         fps = capture.get(cv2.CAP_PROP_FPS)
         if not np.isfinite(fps) or fps <= 0:
             raise ValueError("Video has no valid FPS")
-        detector = PoseDetector()
+        # Independent full-resolution detections avoid temporal smoothing lag
+        # in the saved reference, at the cost of a slower build.
+        detector = PoseDetector(image_mode=True, max_dimension=None)
+        count = capture.get(cv2.CAP_PROP_FRAME_COUNT)
         while True:
             ok, frame = capture.read()
             if not ok:
@@ -71,12 +82,18 @@ def extract_skeleton(video_path, return_timestamps=False):
             # Decoder presentation timestamps retain VFR timing. Fall back only
             # when the backend does not supply increasing timestamps.
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC) / 1000.0
-            if not np.isfinite(timestamp) or timestamp < 0 or (times and timestamp <= times[-1]):
-                timestamp = times[-1] + 1 / fps if times else 0.0
+            if not np.isfinite(timestamp) or timestamp < 0 or (previous_timestamp is not None and timestamp <= previous_timestamp):
+                timestamp = previous_timestamp + 1 / fps if previous_timestamp is not None else 0.0
+            previous_timestamp = timestamp
+            decoded += 1
+            if progress_callback:
+                progress_callback(decoded, count)
+            if target_fps and times and timestamp - times[-1] < 1 / target_fps - 1e-6:
+                continue
             times.append(timestamp)
             frames.append(detector.detect(frame, timestamp * 1000))
         count = capture.get(cv2.CAP_PROP_FRAME_COUNT)
-        if count > 0 and len(frames) < int(count):
+        if count > 0 and decoded < int(count):
             raise ValueError("Video decoding ended early; reference was not saved")
         if not frames:
             raise ValueError("Video has no decoded frames")

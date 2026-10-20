@@ -533,9 +533,9 @@
 .youtube-search input { width: clamp(150px, 19vw, 300px); min-width: 0; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); background: #10152c; font-size: 14px; }
 .youtube-search button, .youtube-results-heading button { border: 1px solid var(--border); border-radius: 8px; padding: 9px 13px; color: white; background: var(--purple); cursor: pointer; }
 .youtube-search button:disabled { opacity: .55; cursor: wait; }
-.top-bar > .upload-button { margin-left: 12px; }
-.top-bar { display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px; }
-.top-bar .title { position: static; transform: none; text-align: center; }
+.header-controls { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.top-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 24px; }
+.top-bar .title { position: static; transform: none; text-align: center; display: block; }
 .youtube-search-section { padding: 22px; margin-bottom: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
 .youtube-search-section[hidden], #youtubeSearchLink[hidden] { display: none; }
 .youtube-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -552,11 +552,12 @@
 .youtube-save-button:disabled { opacity: .55; cursor: default; }
 .youtube-open-video { display: block; margin: 12px; color: #c4b5fd !important; }
 .youtube-open-video[hidden] { display: none; }
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     .top-bar { height: auto; min-height: 76px; padding: 16px; grid-template-columns: 1fr auto; }
-    .top-bar .title { grid-column: 1; grid-row: 1; text-align: left; display: block; }
-    .top-bar .camera-status { grid-column: 2; grid-row: 1; }
-    .youtube-search { grid-column: 1; grid-row: 2; }
+    .top-bar .title { grid-column: 1 / -1; grid-row: 1; text-align: center; display: block; }
+    .header-controls { grid-column: 1 / -1; grid-row: 2; }
+    .top-bar .camera-status { grid-column: 1 / -1; grid-row: 3; margin: 0 auto; }
+    .youtube-search { flex: 1; }
     .youtube-search input { width: 100%; flex: 1; }
-    .top-bar > .upload-button { grid-column: 2; grid-row: 2; margin-left: 0; text-align: center; }
+    .header-controls > .upload-button { text-align: center; }
 }

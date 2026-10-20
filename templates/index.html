@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Follow Me</title>
+    <title>Let's move!</title>
 
     <link
     rel="stylesheet"
@@ -26,6 +26,7 @@
 
 <header class="top-bar">
 
+    <div class="header-controls">
     <form id="youtubeSearchForm" class="youtube-search" role="search" aria-label="Search YouTube">
         <input id="youtubeQuery" type="search" placeholder="Search YouTube videos" aria-label="Search YouTube videos" maxlength="200" required>
         <button id="youtubeSearchButton" type="submit">Search</button>
@@ -37,10 +38,10 @@
     >
         + Upload
     </a>
+    </div>
 
     <h1 class="title follow-brand">
-        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Follow <span>Me</span></span></span>
-        <span class="brand-tagline">Find your rhythm</span>
+        <span class="brand-line"><span class="brand-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-wordmark">Let's <span>move!</span></span></span>
     </h1>
 
     <div
@@ -114,6 +115,10 @@
                         <video
                             class="video-preview"
                             preload="metadata"
+                            autoplay
+                            muted
+                            loop
+                            playsinline
                             controls
                         >
 
@@ -245,6 +250,7 @@
     src="{{ url_for('static', filename='js/index.js') }}"
 ></script>
 
+<script src="{{ url_for('static', filename='js/effects.js') }}"></script>
 </body>
 
 </html>

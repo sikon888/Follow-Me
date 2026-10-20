@@ -40,8 +40,16 @@ def process_reference(filename):
         print("========================")
 
         digest = video_digest(filename)
+        def report_progress(done, total):
+            processing_status[filename] = {
+                'status': 'Processing',
+                'progress': min(98, int(98 * done / total)) if total > 0 else None,
+                'frames_processed': done,
+                'total_frames': int(total),
+            }
         raw, timestamps = extract_skeleton(
-            video_path, return_timestamps=True
+            video_path, return_timestamps=True,
+            progress_callback=report_progress
         )
 
         print(
@@ -52,6 +60,7 @@ def process_reference(filename):
         normalized = normalize_skeleton(
             raw
         )
+        processing_status[filename] = {'status': 'Processing', 'progress': 99}
 
         print(
             "Normalized shape:",
@@ -71,6 +80,7 @@ def process_reference(filename):
 
         processing_status[filename] = {
             "status": "Saved",
+            "progress": 100,
             "reference": output_path.name
         }
 

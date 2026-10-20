@@ -130,3 +130,143 @@ button {
 @media (prefers-reduced-motion: reduce) {
     .brand-equalizer i { animation: none; }
 }
+
+/* Lightweight glitter floats above the background without blocking controls. */
+.page-glitter {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+.page-sparkle {
+    position: absolute;
+    width: var(--sparkle-size);
+    height: var(--sparkle-size);
+    background: #ddd6fe;
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+    opacity: 0;
+    animation: page-twinkle 6s ease-in-out infinite;
+}
+.page-sparkle:nth-child(3n) { background: #f9a8d4; }
+.page-sparkle:nth-child(3n + 1) { background: #a5f3fc; }
+
+/* Neon arcade stage. Decorative layers stay beneath page content. */
+body { isolation: isolate; }
+.rhythm-stage {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 5% 30%, #ec48991c, transparent 45%),
+        radial-gradient(ellipse at 95% 20%, #22d3ee20, transparent 45%);
+}
+.rhythm-grid {
+    position: absolute;
+    left: -50%;
+    bottom: -38vh;
+    width: 200%;
+    height: 90vh;
+    background-image:
+        linear-gradient(#a855f740 1px, transparent 1px),
+        linear-gradient(90deg, #22d3ee30 1px, transparent 1px);
+    background-size: 70px 70px;
+    transform: perspective(420px) rotateX(58deg);
+    mask-image: linear-gradient(transparent, #000 45%);
+    animation: rhythm-scroll 3s linear infinite;
+}
+.rhythm-equalizer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 8px;
+    opacity: .2;
+}
+.rhythm-equalizer i {
+    flex: 1;
+    max-width: 20px;
+    height: var(--bar-height);
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(#67e8f9, #a855f7 55%, #ec4899);
+    transform-origin: bottom;
+    animation: rhythm-bounce 1.2s ease-in-out infinite alternate;
+}
+.top-bar { box-shadow: 0 1px 0 #a855f755, 0 6px 30px #7c3aed18; }
+.brand-wordmark { filter: drop-shadow(0 0 12px #c084fc44); }
+.video-card, .game-card, .youtube-result {
+    border-color: #a78bfa33;
+    box-shadow: 0 10px 35px #0004, 0 0 20px #7c3aed0d;
+}
+.video-card { transition: border-color .2s, box-shadow .2s, translate .2s; }
+.video-card:hover {
+    border-color: #67e8f988;
+    box-shadow: 0 12px 35px #0005, 0 0 24px #a855f733;
+    translate: 0 -3px;
+}
+button, a[class$="button"] { transition: filter .16s, box-shadow .16s; }
+button:hover:not(:disabled), a[class$="button"]:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 18px #a855f750;
+}
+button:focus-visible, a:focus-visible {
+    outline: 2px solid #67e8f9;
+    outline-offset: 4px;
+}
+.rhythm-burst {
+    position: fixed;
+    z-index: 30;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+.rhythm-hit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #a5f3fc;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #c084fc;
+    animation: rhythm-hit .55s ease-out forwards;
+}
+.rhythm-click-spark {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: #67e8f9;
+    box-shadow: 0 0 9px currentColor;
+    color: #67e8f9;
+    animation: click-spark .6s ease-out forwards;
+}
+.rhythm-click-spark:nth-child(2n) { background: #f472b6; color: #f472b6; }
+.rhythm-click-spark:nth-child(3n) { background: #c4b5fd; color: #c4b5fd; }
+@keyframes click-spark {
+    from { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+    to { transform: translate(var(--spark-x), var(--spark-y)) rotate(150deg) scale(.15); opacity: 0; }
+}
+@keyframes rhythm-scroll { to { background-position: 0 70px; } }
+@keyframes rhythm-bounce { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+@keyframes rhythm-hit {
+    from { transform: translate(-50%, -50%) scale(.4); opacity: .8; }
+    to { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+@keyframes page-twinkle {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(.5); }
+    50% { opacity: .55; transform: translateY(-12px) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .page-sparkle { animation: none; opacity: .2; }
+    .rhythm-grid, .rhythm-equalizer i { animation: none; }
+    .rhythm-burst { display: none; }
+    .video-card:hover { translate: none; }
+}

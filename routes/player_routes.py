@@ -10,10 +10,12 @@ from modules.scoring import compare_pose, frame_at
 
 player_bp = Blueprint('player', __name__)
 lock = threading.Lock()
+live_detector = None
 
 
 @player_bp.post('/api/player/<path:filename>')
 def player_frame(filename):
+    global live_detector
     try:
         seconds = float(request.form['time'])
         if not np.isfinite(seconds) or seconds < 0:
@@ -25,13 +27,11 @@ def player_frame(filename):
         image = cv2.imdecode(np.frombuffer(encoded, np.uint8), cv2.IMREAD_COLOR)
         if image is None or max(image.shape[:2]) > 1920:
             raise ValueError('Invalid camera frame')
-        # Independent tasks avoid carrying tracking across users or song seeks.
+        # IMAGE mode reuses model weights without tracking across users/seeks.
         with lock:
-            detector = PoseDetector()
-            try:
-                raw = detector.detect(image, 0)
-            finally:
-                detector.close()
+            if live_detector is None:
+                live_detector = PoseDetector(image_mode=True)
+            raw = live_detector.detect(image, 0)
         try:
             player = normalize_skeleton(raw[None])[0]
         except ValueError:

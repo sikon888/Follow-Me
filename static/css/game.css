@@ -458,7 +458,20 @@
     }
 
     .page-title {
-        display: none;
+        display: block;
+        position: static;
+        transform: none;
+        text-align: center;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .top-bar {
+        height: auto;
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+        padding: 16px;
     }
 
     .game-page {

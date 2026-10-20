@@ -82,6 +82,29 @@
     <p id="skeletonHint" hidden aria-live="polite"></p>
 
 
+    <aside class="build-advice" aria-labelledby="buildAdviceTitle">
+        <button id="toggleBuildAdvice" class="advice-toggle" type="button"
+                aria-expanded="true" aria-controls="buildAdviceContent">Hide recommendations</button>
+        <h2 id="buildAdviceTitle">Before you build your reference</h2>
+        <div id="buildAdviceContent">
+        <p>For a quicker build, choose a 1–3 minute video at 30 FPS with one dancer clearly visible from head to toe.</p>
+        <div class="build-estimates">
+            <table>
+                <caption>Approximate build time on this PC</caption>
+                <thead><tr><th scope="col">Video length</th><th scope="col">30 FPS</th><th scope="col">60 FPS</th></tr></thead>
+                <tbody>
+                    <tr><th scope="row">1 minute</th><td>~1 minute</td><td>~2 minutes</td></tr>
+                    <tr><th scope="row">5 minutes</th><td>~5 minutes</td><td>~9–10 minutes</td></tr>
+                    <tr><th scope="row">10 minutes</th><td>~9–10 minutes</td><td>~19 minutes</td></tr>
+                    <tr><th scope="row">20 minutes</th><td>~19 minutes</td><td>~38 minutes</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="build-estimate-note">Estimates use a short test on this PC, not a guaranteed finish time. Resolution and other running programs can change the time.</p>
+        <p>Every frame is checked for better movement timing. Build once, then reuse the saved reference for play. For smoother gameplay, finish building before starting a game.</p>
+        </div>
+    </aside>
+
     <div class="controls">
 
 
@@ -138,6 +161,7 @@
 ></script>
 
 
+<script src="{{ url_for('static', filename='js/effects.js') }}"></script>
 </body>
 
 </html>

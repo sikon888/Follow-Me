@@ -301,6 +301,24 @@
 }
 
 .rename-reference { margin-bottom: 24px; }
+.build-advice {
+    margin: 22px 0;
+    padding: 20px;
+    border: 1px solid #a78bfa55;
+    border-left: 3px solid #67e8f9;
+    border-radius: 12px;
+    background: linear-gradient(120deg, #7c3aed18, #22d3ee0a);
+    line-height: 1.6;
+}
+.build-advice h2 { margin: 0 0 10px; font-size: 18px; color: #e9d5ff; }
+.advice-toggle { display: block; margin: 0 0 12px auto; padding: 7px 12px; border: 1px solid #a78bfa66; border-radius: 8px; color: #e9d5ff; background: #7c3aed22; font-size: 13px; }
+.build-advice p { margin: 10px 0; font-size: 14px; }
+.build-estimates { overflow-x: auto; }
+.build-estimates table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.build-estimates caption { text-align: left; margin: 8px 0; font-weight: 700; color: #a5f3fc; }
+.build-estimates th, .build-estimates td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.build-estimates thead { color: #c4b5fd; }
+.build-advice .build-estimate-note { font-size: 12px; color: var(--muted); }
 .rename-reference label { display: block; margin-bottom: 8px; color: var(--muted); }
 .rename-fields { display: flex; gap: 12px; flex-wrap: wrap; }
 .rename-fields input { flex: 1; min-width: 160px; padding: 11px 12px; background: #080c1d; color: var(--text); border: 1px solid var(--border); border-radius: 9px; font-size: 16px; }

@@ -69,7 +69,13 @@ class PoseTests(unittest.TestCase):
         from app import app
         client = app.test_client()
         self.assertEqual(client.get('/').status_code, 200)
-        self.assertEqual(client.get('/play/snaptik_7372751698168679681_v3.mp4').status_code, 400)
+        # Readiness must not depend on which local videos have been rebuilt.
+        with patch('routes.game_routes.get_video_path') as video, \
+                patch('routes.game_routes.reference_exists', return_value=False):
+            video.return_value.is_file.return_value = True
+            self.assertEqual(client.get('/play/legacy.mp4').status_code, 400)
+            video.return_value.is_file.return_value = False
+            self.assertEqual(client.get('/play/missing.mp4').status_code, 404)
         self.assertEqual(client.post('/api/player/unknown.mp4', data={'time': 'nan'}).status_code, 400)
 
 
