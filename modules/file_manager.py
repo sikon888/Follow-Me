@@ -1,4 +1,17 @@
 from pathlib import Path
+import time
+
+
+def unlink_with_retry(path):
+    """Allow a cancelled browser stream a short time to close on Windows."""
+    for attempt in range(10):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except OSError as error:
+            if getattr(error, 'winerror', None) not in (32, 33) or attempt == 9:
+                raise
+            time.sleep(0.1)
 
 
 # =========================================
@@ -155,7 +168,6 @@ def delete_video_and_reference(
     ).name
 
     from modules.reference_names import name_path
-    name_path(safe_filename).unlink(missing_ok=True)
 
 
     video_path = (
@@ -189,7 +201,7 @@ def delete_video_and_reference(
 
     if video_path.is_file():
 
-        video_path.unlink()
+        unlink_with_retry(video_path)
 
         result["video"] = True
 
@@ -205,7 +217,7 @@ def delete_video_and_reference(
 
     if reference_path.is_file():
 
-        reference_path.unlink()
+        unlink_with_retry(reference_path)
 
         result["reference"] = True
 
@@ -215,4 +227,5 @@ def delete_video_and_reference(
         )
 
 
+    name_path(safe_filename).unlink(missing_ok=True)
     return result

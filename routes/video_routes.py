@@ -182,6 +182,9 @@ def delete_video(filename):
             }), 400
 
 
+        if get_status(filename).get('status') == 'Processing':
+            return jsonify(status='Error', error='This video is building a reference. Wait for it to finish before deleting.'), 409
+
         result = (
             delete_video_and_reference(
                 filename
@@ -202,6 +205,11 @@ def delete_video(filename):
 
         })
 
+
+    except OSError as error:
+        if getattr(error, 'winerror', None) in (32, 33):
+            return jsonify(status='Error', error='This video is still in use. Stop playback in other tabs or apps, then try deleting again.'), 409
+        return jsonify(status='Error', error=str(error)), 500
 
     except Exception as error:
 

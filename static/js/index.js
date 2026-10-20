@@ -11,6 +11,17 @@ async function deleteVideo(filename, button) {
     button.disabled = true;
     button.textContent = "Deleting...";
 
+    // Windows cannot remove a file while its autoplay preview is streaming.
+    const preview = button.closest('.video-card')?.querySelector('video');
+    const previewSources = preview ? [...preview.querySelectorAll('source')].map(source => [source, source.getAttribute('src')]) : [];
+    const previewSrc = preview?.getAttribute('src');
+    if (preview) {
+        preview.pause();
+        preview.removeAttribute('src');
+        previewSources.forEach(([source]) => source.removeAttribute('src'));
+        preview.load();
+    }
+
     try {
 
         const response = await fetch(
@@ -52,6 +63,13 @@ async function deleteVideo(filename, button) {
         throw new Error("Delete failed");
 
     } catch (error) {
+        if (preview) {
+            if (previewSrc !== null) preview.setAttribute('src', previewSrc);
+            previewSources.forEach(([source, src]) => {
+                if (src !== null) source.setAttribute('src', src);
+            });
+            preview.load();
+        }
 
         console.error(
             "DELETE ERROR:",
