@@ -39,16 +39,28 @@ def capture_timestamp(metadata, fallback):
 
 
 def main():
-    from picamera2 import Picamera2
     parser = argparse.ArgumentParser(description='Send Pi Camera frames to the dance game')
     parser.add_argument('--server', required=True, help='Example: http://192.168.1.20:5001')
-    parser.add_argument('--fps', type=float, default=8)
+    parser.add_argument('--fps', type=float, default=24)
+    parser.add_argument('--size', choices=['320x240', '480x360', '640x480'], default='480x360')
+    parser.add_argument('--check', action='store_true', help='Check server and capture one frame, then exit')
     args = parser.parse_args()
+    width, height = map(int, args.size.split('x'))
     if not 0 < args.fps <= 30:
         parser.error('--fps must be between 0 and 30')
+    from picamera2 import Picamera2
+    if args.check:
+        offset, clock_id, uncertainty = synchronize_clock(args.server)
+        print(f'Server reachable; clock uncertainty {uncertainty:.3f}s', flush=True)
     camera = Picamera2()
+    # Keep the widest field of view even when transmitting a small image.
+    modes = camera.sensor_modes
+    mode = min(modes, key=lambda m: (-m['crop_limits'][2] * m['crop_limits'][3],
+                                    m['size'][0] * m['size'][1], -m['bit_depth']))
     camera.configure(camera.create_video_configuration(
-        main={'size': (640, 480), 'format': 'RGB888'}, buffer_count=2))
+        sensor={'output_size': mode['size'], 'bit_depth': mode['bit_depth']},
+        main={'size': (width, height), 'format': 'RGB888'}, buffer_count=2,
+        controls={'FrameRate': args.fps}, queue=False))
     camera.start()
     endpoint = args.server.rstrip('/') + '/api/camera/frame'
     offset = None
@@ -73,8 +85,11 @@ def main():
                 captured, source = capture_timestamp(camera_request.get_metadata(), time.monotonic())
             finally:
                 camera_request.release()
-            ok, encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            image = cv2.rotate(image, cv2.ROTATE_180)
+            ok, encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 75])
             if not ok:
+                if args.check:
+                    raise RuntimeError('Camera JPEG encoding failed')
                 continue
             request = urllib.request.Request(endpoint, data=encoded.tobytes(),
                 headers={'Content-Type': 'image/jpeg',
@@ -84,7 +99,12 @@ def main():
             try:
                 with urllib.request.urlopen(request, timeout=3) as response:
                     response.read()
+                if args.check:
+                    print(f'Camera capture and upload OK ({args.size}).', flush=True)
+                    return
             except (urllib.error.URLError, TimeoutError, OSError) as error:
+                if args.check:
+                    raise
                 if isinstance(error, urllib.error.HTTPError) and error.code == 409:
                     offset = None
                 print('Disconnected; retrying:', error, flush=True)

@@ -16,10 +16,15 @@ __pycache__/
 *.key
 
 # Local videos, generated references, models and logs
-uploads/
+uploads/*
+!uploads/*.mp4
 input_videos/
 processed_videos/
-reference_library/
+reference_library/*
+!reference_library/mediapipe_v1/
+reference_library/mediapipe_v1/*
+!reference_library/mediapipe_v1/*.npz
+!reference_library/mediapipe_v1/*.name.json
 models/*
 runs/
 *.pt

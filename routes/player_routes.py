@@ -37,7 +37,12 @@ def player_frame(filename):
         except ValueError:
             player = np.zeros((17, 3), np.float32)
         index = frame_at(times, seconds)
-        accuracy = compare_pose(mirror_skeleton(reference[index]), player)
+        # Nearby reference poses soften small reaction/network timing errors.
+        candidates = {frame_at(times, max(0, seconds + offset))
+                      for offset in (-0.5, -0.25, 0, 0.25, 0.5)}
+        matches = [compare_pose(mirror_skeleton(reference[i]), player) for i in candidates]
+        valid_matches = [value for value in matches if value is not None]
+        accuracy = max(valid_matches) if valid_matches else None
         return jsonify(accuracy=accuracy, detected=bool(np.any(player[:, 2])),
                        frame=index, time=seconds, skeleton=raw.tolist(),
                        width=image.shape[1], height=image.shape[0])

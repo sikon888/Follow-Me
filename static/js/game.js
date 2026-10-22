@@ -40,11 +40,8 @@ const muteButton =
 const scoreValue =
     document.getElementById("scoreValue");
 
-const accuracyValue =
-    document.getElementById("accuracyValue");
 
-const comboValue =
-    document.getElementById("comboValue");
+
 
 
 /* =========================================
@@ -96,7 +93,7 @@ function playCountdownCue(isGo = false) {
         oscillator.type = 'triangle';
         oscillator.frequency.value = frequency;
         envelope.gain.setValueAtTime(0, now);
-        envelope.gain.linearRampToValueAtTime(0.18, now + 0.008);
+        envelope.gain.linearRampToValueAtTime(0.45, now + 0.008);
         envelope.gain.exponentialRampToValueAtTime(0.001, now + duration);
         oscillator.connect(envelope);
         envelope.connect(countdownGain);
@@ -170,50 +167,13 @@ function formatTime(seconds) {
    SCOREBOARD
 ========================================= */
 
-function updateScoreboard(
-    score,
-    accuracy,
-    combo
-) {
-
-    const previousCombo = Number(comboValue.dataset.combo || 0);
-    const comboItem = comboValue.closest('.score-item');
-    comboItem.classList.remove('combo-pop', 'combo-milestone');
-
-    scoreValue.textContent =
-        Math.round(score)
-            .toLocaleString();
-
-
-    accuracyValue.textContent =
-        Math.round(accuracy) + "%";
-
-
-    comboValue.textContent =
-        "x" + combo;
-
-    comboValue.dataset.combo = String(combo);
-    if (combo > previousCombo && combo > 0) {
-        // Restart the effect even when two scoring samples arrive close together.
-        void comboItem.offsetWidth;
-        comboItem.classList.add('combo-pop');
-        if (combo % 10 === 0) comboItem.classList.add('combo-milestone');
-    }
-
+function updateScoreboard(score, accuracy) {
+    scoreValue.textContent = Math.round(score).toLocaleString();
 }
-
-
-/* =========================================
-   RESET SCOREBOARD
-========================================= */
 
 function resetScoreboard() {
 
-    updateScoreboard(
-        0,
-        0,
-        0
-    );
+    updateScoreboard(0, 0);
 
 }
 
@@ -492,12 +452,11 @@ async function startCountdown() {
     countdownRunning =
         true;
 
+    document.getElementById("playerTrackingNotice").hidden = true;
     const countdownToken = ++countdownGeneration;
     prepareCountdownAudio();
-    // Give resume() a microtask to unlock the audio before the first tick.
-    if (countdownAudio?.state === 'suspended') {
-        try { await countdownAudio.resume(); } catch (error) { console.warn(error); }
-    }
+    // A gesture has no browser click permission. Audio resume may stay pending;
+    // the visual countdown must proceed while prepareCountdownAudio retries it.
     if (countdownToken !== countdownGeneration) return;
 
 
@@ -580,6 +539,22 @@ async function startCountdown() {
    START GAME
 ========================================= */
 
+async function playReferenceVideo() {
+    try {
+        await video.play();
+        return false;
+    } catch (error) {
+        if (error.name !== 'NotAllowedError' || video.muted) throw error;
+        // Browser autoplay with sound requires a click; gesture starts can
+        // still show the dancer immediately using permitted muted playback.
+        video.muted = true;
+        updateVolumeUI();
+        updateCountdownVolume();
+        await video.play();
+        return true;
+    }
+}
+
 async function startGame() {
 
     readyButton.disabled = false;
@@ -609,7 +584,8 @@ async function startGame() {
 
     try {
 
-        await video.play();
+        const mutedForAutoplay = await playReferenceVideo();
+        if (mutedForAutoplay) gameStatus.textContent = 'Dancing — click the speaker to enable sound';
 
     }
 
@@ -622,7 +598,9 @@ async function startGame() {
 
 
         gameStatus.textContent =
-            "Press Ready to allow video playback";
+            error.name === 'NotAllowedError'
+                ? 'Click Ready to allow video playback'
+                : 'Video could not play: ' + error.message;
 
 
         gameRunning =

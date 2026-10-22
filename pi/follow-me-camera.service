@@ -1,0 +1,14 @@
+[Unit]
+Description=Follow Me Raspberry Pi camera sender
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/follow-me-camera/camera.env
+WorkingDirectory=%h/follow-me-camera
+ExecStart=/usr/bin/python3 -u %h/follow-me-camera/pi_camera.py --server ${SERVER_URL} --size 480x360 --fps 24
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

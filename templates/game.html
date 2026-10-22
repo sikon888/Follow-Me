@@ -37,15 +37,7 @@
                     <strong id="scoreValue">0</strong>
                 </div>
 
-                <div class="score-item">
-                    <span class="score-label" title="Accuracy of your latest scored pose">LIVE ACC</span>
-                    <strong id="accuracyValue">0%</strong>
-                </div>
 
-                <div class="score-item">
-                    <span class="score-label">COMBO</span>
-                    <strong id="comboValue">x0</strong>
-                </div>
             </div>
         </div>
 
@@ -113,7 +105,7 @@
             <div id="countdown" class="countdown hidden">3</div>
 
             <div id="startOverlay" class="start-overlay">
-                <div class="ready-text">Raise a hand above your head<br>Hold for 1 second to start</div>
+                <div class="ready-text">Raise a hand above your head<br>Hold for 2 seconds to start</div>
             </div>
 
         </div>
@@ -125,12 +117,22 @@
             <div class="player-view">
                 <canvas id="piPreview" width="640" height="480" hidden></canvas>
                 <div id="piDisconnected">Disconnected</div>
+                <div id="playerTrackingNotice" class="player-tracking-notice" role="status" hidden></div>
             </div>
-            <p id="playerPoseStatus" role="status">Waiting for Raspberry Pi camera</p>
-            <p id="cameraTimingStatus" class="reference-caption"></p>
+            <p id="playerPoseStatus" role="status" hidden></p>
+            <p id="cameraTimingStatus" class="reference-caption" hidden></p>
         </section>
         </div>
 
+        <section id="gameSummary" class="game-summary" hidden aria-live="polite">
+            <h2>Dance complete!</h2>
+            <div class="summary-stats">
+                <div>Total score<strong id="finalScore">0</strong></div>
+                <div>Average accuracy<strong id="finalAccuracy">0%</strong></div>
+                <div>Matched poses<strong id="finalMatches">0 / 0</strong></div>
+            </div>
+            <p id="finalFeedback"></p>
+        </section>
         <div class="game-controls">
 
             <button
