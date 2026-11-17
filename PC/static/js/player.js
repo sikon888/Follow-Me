@@ -1,4 +1,4 @@
-// The Pi pushes JPEGs to Flask. Score exactly the image shown in the player panel.
+// The Pi pushes paired JPEGs and skeletons. Score the exact displayed frame ID.
 const playerEndpoint = document.currentScript.dataset.endpoint;
 const piPreview = document.getElementById('piPreview');
 const piContext = piPreview.getContext('2d');
@@ -183,8 +183,10 @@ async function pollPiCamera() {
         if (!response.ok) { retryDelay = 500; setPiConnected(false); return; }
         setPiConnected(true);
         const frameId = response.headers.get('X-Frame-Id');
-        if (frameId === lastFrameId) return;
-        lastFrameId = frameId;
+        const clockId = response.headers.get('X-Clock-Id');
+        const frameKey = `${clockId}:${frameId}`;
+        if (frameKey === lastFrameId) return;
+        lastFrameId = frameKey;
         const token = generation;
         const timing = cameraFrameTiming(response.headers, observedAt - fetchStarted);
         const songTime = timing ? alignedSongTime(video.currentTime, timing.ageMs,
@@ -192,18 +194,26 @@ async function pollPiCamera() {
         const scoring = songTime !== null && gameRunning && !video.paused && !video.seeking && !video.ended;
         const blob = await response.blob();
         bitmap = await createImageBitmap(blob);
-        const form = new FormData();
-        form.append('frame', blob, 'pi-camera.jpg');
-        form.append('time', songTime ?? Math.max(0, video.currentTime));
-        const resultResponse = await fetch(playerEndpoint, {
-            method: 'POST', body: form, signal: AbortSignal.timeout(5000)});
+        const piPose = response.headers.get('X-Pose-Backend') === 'pi';
+        const requestTime = songTime ?? Math.max(0, video.currentTime);
+        const options = {method: 'POST', signal: AbortSignal.timeout(5000)};
+        if (piPose) {
+            options.headers = {'Content-Type': 'application/json'};
+            options.body = JSON.stringify({frame_id: Number(frameId), clock_id: clockId, time: requestTime});
+        } else {
+            const form = new FormData();
+            form.append('frame', blob, 'pi-camera.jpg');
+            form.append('time', requestTime);
+            options.body = form;
+        }
+        const resultResponse = await fetch(playerEndpoint, options);
         const result = await resultResponse.json();
         if (!resultResponse.ok) throw new Error(result.error || 'Pose detection failed');
         // Render scores immediately. Timestamp age already guards freshness;
         // an extra status request would only postpone the scoreboard update.
         const resultAgeMs = timing ? timing.ageMs + performance.now() - observedAt : Infinity;
         cameraTimingStatus.textContent = timing
-            ? `Camera delay: ${Math.round(resultAgeMs)} ms${timing.source === 'sensor' ? '' : ' (estimated; update Pi camera script)'}`
+            ? `Camera delay: ${Math.round(resultAgeMs)} ms · Pose: ${piPose ? 'Pi' : 'PC'}${timing.source === 'sensor' ? '' : ' (estimated)'}`
             : 'Camera timing unavailable; scoring is waiting';
         // Draw the image and its overlays together, after inference finishes.
         // Clearing the canvas before awaiting inference caused visible blinking.

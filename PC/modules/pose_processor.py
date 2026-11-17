@@ -24,11 +24,12 @@ def landmarks_to_coco(landmarks, width, height):
 
 
 class PoseDetector:
-    def __init__(self, image_mode=False, max_dimension=640):
+    def __init__(self, image_mode=False, max_dimension=640, model_path=None):
         self.image_mode = image_mode
         self.max_dimension = max_dimension
-        if not MODEL_PATH.is_file():
-            raise RuntimeError(f"MediaPipe model missing: {MODEL_PATH}. See README.md")
+        model_path = Path(model_path) if model_path else MODEL_PATH
+        if not model_path.is_file():
+            raise RuntimeError(f"MediaPipe model missing: {model_path}. See README.md")
         try:
             import mediapipe as mp
         except ImportError as exc:
@@ -36,7 +37,7 @@ class PoseDetector:
         self.mp = mp
         self.task = mp.tasks.vision.PoseLandmarker.create_from_options(
             mp.tasks.vision.PoseLandmarkerOptions(
-                base_options=mp.tasks.BaseOptions(model_asset_path=str(MODEL_PATH)),
+                base_options=mp.tasks.BaseOptions(model_asset_path=str(model_path)),
                 running_mode=(mp.tasks.vision.RunningMode.IMAGE if image_mode else mp.tasks.vision.RunningMode.VIDEO), num_poses=1,
                 min_pose_detection_confidence=0.5, min_pose_presence_confidence=0.5,
                 min_tracking_confidence=0.5))

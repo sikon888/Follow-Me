@@ -1,0 +1,2 @@
+uploads/*.mp4 filter=lfs diff=lfs merge=lfs -text
+reference_library/mediapipe_v1/*.npz filter=lfs diff=lfs merge=lfs -text

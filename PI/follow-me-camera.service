@@ -1,5 +1,5 @@
 [Unit]
-Description=Follow Me Raspberry Pi camera sender
+Description=Follow Me Raspberry Pi camera and pose sender
 
 [Service]
 Type=simple

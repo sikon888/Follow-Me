@@ -6,6 +6,7 @@ import time
 import urllib.request
 import urllib.error
 import cv2
+from pathlib import Path
 
 
 def synchronize_clock(server, attempts=3):
@@ -39,15 +40,24 @@ def capture_timestamp(metadata, fallback):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Send Pi Camera frames to the dance game')
+    parser = argparse.ArgumentParser(description='Detect poses on the Pi and send paired camera frames to the game')
     parser.add_argument('--server', required=True, help='Example: http://192.168.1.20:5001')
     parser.add_argument('--fps', type=float, default=24)
     parser.add_argument('--size', choices=['320x240', '480x360', '640x480'], default='480x360')
     parser.add_argument('--check', action='store_true', help='Check server and capture one frame, then exit')
+    parser.add_argument('--camera-only', action='store_true', help='Legacy mode: let the PC detect poses')
+    parser.add_argument('--model', default=str(Path(__file__).resolve().parent / 'models' / 'pose_landmarker_lite.task'))
+    parser.add_argument('--pose-python', default=str(Path(__file__).resolve().parent / '.pose-venv' / 'bin' / 'python'),
+                        help='Isolated MediaPipe Python executable (Pi 4: Python 3.12)')
     args = parser.parse_args()
     width, height = map(int, args.size.split('x'))
     if not 0 < args.fps <= 30:
         parser.error('--fps must be between 0 and 30')
+    detector = None
+    if not args.camera_only:
+        from pose_worker import PoseWorker
+        detector = PoseWorker(args.pose_python, args.model)
+        print('Pose detection: Pi (MediaPipe VIDEO tracking)', flush=True)
     from picamera2 import Picamera2
     if args.check:
         offset, clock_id, uncertainty = synchronize_clock(args.server)
@@ -66,6 +76,9 @@ def main():
     offset = None
     synced_at = 0
     print('Sending camera to', endpoint, '(Ctrl+C to stop)', flush=True)
+    frames_sent = 0
+    report_at = time.monotonic()
+    inference_total = 0.0
     try:
         while True:
             started = time.monotonic()
@@ -86,22 +99,34 @@ def main():
             finally:
                 camera_request.release()
             image = cv2.rotate(image, cv2.ROTATE_180)
+            pose = None
+            if detector is not None:
+                inference_started = time.monotonic()
+                pose = detector.detect(image, captured * 1000)
+                inference_total += time.monotonic() - inference_started
             ok, encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 75])
             if not ok:
                 if args.check:
                     raise RuntimeError('Camera JPEG encoding failed')
                 continue
-            request = urllib.request.Request(endpoint, data=encoded.tobytes(),
-                headers={'Content-Type': 'image/jpeg',
+            headers = {'Content-Type': 'image/jpeg',
                          'X-Captured-At': str(captured + offset),
                          'X-Clock-Id': clock_id, 'X-Timing-Source': source,
-                         'X-Clock-Uncertainty': str(uncertainty)}, method='POST')
+                         'X-Clock-Uncertainty': str(uncertainty)}
+            if pose is not None:
+                headers['X-Pose-Skeleton'] = json.dumps(pose.round(4).tolist(), separators=(',', ':'), allow_nan=False)
+            request = urllib.request.Request(endpoint, data=encoded.tobytes(), headers=headers, method='POST')
             try:
                 with urllib.request.urlopen(request, timeout=3) as response:
                     response.read()
                 if args.check:
-                    print(f'Camera capture and upload OK ({args.size}).', flush=True)
+                    print(f'Camera capture, {"Pi pose detection, " if detector else ""}and upload OK ({args.size}).', flush=True)
                     return
+                frames_sent += 1
+                elapsed = time.monotonic() - report_at
+                if elapsed >= 10:
+                    print(f'Sent {frames_sent / elapsed:.1f} FPS; inference {inference_total / frames_sent * 1000:.0f} ms/frame', flush=True)
+                    frames_sent, inference_total, report_at = 0, 0.0, time.monotonic()
             except (urllib.error.URLError, TimeoutError, OSError) as error:
                 if args.check:
                     raise
@@ -115,6 +140,8 @@ def main():
     finally:
         camera.stop()
         camera.close()
+        if detector is not None:
+            detector.close()
 
 
 if __name__ == '__main__':
