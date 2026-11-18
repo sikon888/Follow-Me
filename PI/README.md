@@ -9,9 +9,9 @@ and skeletons, recognizes the start gesture and awards points.
 ## Connection
 
 Connect both devices to the same LAN (`rung_AIS_2.4GHz` in this installation).
-The Pi is `sikon.local`, last checked at `192.168.1.115`. The PC was
-`192.168.1.107` on 2026-11-12. Verify the PC address using `ipconfig`;
-DHCP addresses can change. PuTTY: SSH port 22, username `sikon`.
+The Pi in this installation uses `sikon.local`. On the Windows PC that is
+running Follow Me, run `ipconfig` and use the IPv4 address of its active Ethernet
+or Wi-Fi adapter. DHCP addresses can change. PuTTY uses SSH port 22.
 
 For a new Wi-Fi network, enter its password locally:
 
@@ -28,8 +28,7 @@ only PI, run `bash install.sh http://PC_IP:5001` inside it on the Pi.
 Start the PC server and keep it running:
 
 ```powershell
-cd PC
-.\.venv\Scripts\python.exe app.py
+.\PC\start.cmd
 ```
 
 Allow Python/TCP 5001 on your private LAN if Windows Firewall asks.
@@ -44,7 +43,7 @@ Then on the Pi, as the normal login user:
 
 ```bash
 cd ~/follow-me-setup
-bash PI/install.sh http://192.168.1.107:5001
+bash PI/install.sh http://PC_IP:5001
 ```
 
 The installer needs internet access. It installs OS camera packages, uses uv
@@ -94,17 +93,26 @@ Full human gameplay and Lite-versus-Full accuracy still need hands-on checking.
 ```bash
 systemctl --user status follow-me-camera --no-pager
 journalctl --user -u follow-me-camera -n 30 --no-pager
-curl --fail http://192.168.1.107:5001/api/camera/clock
+curl --fail --max-time 5 http://PC_IP:5001/api/camera/clock
 rpicam-hello --list-cameras
 ```
 
-Update `SERVER_URL` in `~/.config/follow-me-camera/camera.env` when the PC
-address changes, then run `systemctl --user restart follow-me-camera`.
+Replace `PC_IP` with the current Windows PC address. If the clock request
+times out, check that the PC server is running, both devices are on the same
+LAN and the Windows firewall allows inbound TCP 5001 on the Private profile.
+When switching PCs or changing addresses, run the following from your copy of
+the setup folder. It checks the new address, saves it and restarts the existing
+camera service using the packages already installed.
+
+```bash
+bash PI/set-server.sh http://PC_IP:5001
+```
+
 For a manual check, stop the service so the camera is free:
 
 ```bash
 systemctl --user stop follow-me-camera
-python3 ~/follow-me-camera/pi_camera.py --server http://192.168.1.107:5001 --check
+python3 ~/follow-me-camera/pi_camera.py --server http://PC_IP:5001 --check
 systemctl --user start follow-me-camera
 ```
 

@@ -5,7 +5,24 @@ saved videos and pose references. No files from the repository root are needed.
 Use Windows x64 with Python 3.14. The Pi camera sender is installed separately
 from `PI`; the PC can start and manage reference videos without a Pi.
 
-## Download
+## Install and run
+
+If you have the Follow-Me offline ZIP, extract the whole ZIP to a writable
+folder. It includes the six MP4s, their saved pose references, the model and
+Windows x64 Python dependency wheels. Python 3.14 x64 must already be installed
+on each PC and available through `py -3.14` or `python`.
+
+Double-click `PC\start.cmd`. It sets up a local `.venv` on first launch and
+reuses it on subsequent launches. The offline ZIP installs from its
+`PC\wheelhouse` folder. When moving to another computer, use the ZIP or copy the
+app folder without `.venv` so the launcher can build it on the destination.
+
+Open http://127.0.0.1:5001. For the Pi, use the Windows PC's LAN IPv4 address
+from `ipconfig` and allow inbound TCP 5001 through Windows Firewall on the
+Private network profile. Keep the server running and both devices on the same
+trusted LAN. See [Pi connection setup](../PI/README.md#connection).
+
+## Git checkout
 
 The videos and NPZ references use Git LFS. Install Git and Git LFS, then:
 
@@ -21,20 +38,8 @@ contain LFS pointer files instead of videos; use the clone procedure to ensure
 the six saved songs and references are present. You can also use your own MP4s
 through Upload and Save Reference.
 
-## Install and run
-
-Open PowerShell **inside this PC folder**:
-
-```powershell
-py -3.14 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe app.py
-```
-
-Open http://127.0.0.1:5001. Allow Python/TCP 5001 on your private LAN for the Pi.
-Give the Pi your PC's current LAN IPv4 address from `ipconfig`, for example
-`http://192.168.1.20:5001`. Keep the server running while installing/using the Pi.
-Both devices must be on the same trusted LAN; endpoints have no authentication.
+Run `PC\start.cmd` from the checkout. On first launch it downloads dependencies
+if no wheelhouse is present.
 
 The Full pose model is included in `models`. To replace a missing model:
 
@@ -44,8 +49,8 @@ Invoke-WebRequest 'https://storage.googleapis.com/mediapipe-models/pose_landmark
 ```
 
 `MEDIAPIPE_POSE_MODEL` overrides the model path. Optional `YOUTUBE_API_KEY`
-enables API search; keyless search is available. Internet access is required for
-package installation and YouTube features. FFmpeg is supplied by imageio-ffmpeg.
+enables API search; keyless search is available. YouTube features require
+internet access. FFmpeg is supplied by imageio-ffmpeg.
 YouTube may restrict individual downloads. Upload local MP4s as an alternative.
 
 ## Play
