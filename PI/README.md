@@ -100,6 +100,16 @@ rpicam-hello --list-cameras
 Replace `PC_IP` with the current Windows PC address. If the clock request
 times out, check that the PC server is running, both devices are on the same
 LAN and the Windows firewall allows inbound TCP 5001 on the Private profile.
+On a trusted Wi-Fi network configured as Private, you can limit that rule
+to the Pi's IPv4 address. Run this once in Windows PowerShell as Administrator,
+replacing both example IPs with the current addresses:
+
+```powershell
+New-NetFirewallRule -DisplayName 'Follow Me camera from Pi' -Direction Inbound -Action Allow `
+    -Protocol TCP -LocalPort 5001 -LocalAddress 192.168.1.20 `
+    -RemoteAddress 192.168.1.21 -Profile Private
+```
+
 When switching PCs or changing addresses, run the following from your copy of
 the setup folder. It checks the new address, saves it and restarts the existing
 camera service using the packages already installed.
@@ -107,6 +117,12 @@ camera service using the packages already installed.
 ```bash
 bash PI/set-server.sh http://PC_IP:5001
 ```
+
+If the script has already been copied into the camera installation, run
+`bash ~/follow-me-camera/set-server.sh http://PC_IP:5001`. After it restarts the
+service, open `http://127.0.0.1:5001/api/camera/status` on the PC. A response
+of `{"connected":true}` confirms that the server is receiving recent camera
+frames.
 
 For a manual check, stop the service so the camera is free:
 
