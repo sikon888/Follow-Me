@@ -1,5 +1,8 @@
 # Follow Me - PC server
 
+For Windows and Raspberry Pi setup in one place, see the
+[installation and play guide](../report/QUICK_START.md).
+
 This folder contains the complete Windows PC application, model, web assets,
 saved videos and pose references. No files from the repository root are needed.
 Use Windows x64 with Python 3.14. The Pi camera sender is installed separately
